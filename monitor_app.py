@@ -19,7 +19,7 @@ CAIDAS: Final = [14, 12, 15, 9, 0, 22,
 # Datos del programa. Solo hay que cambiar AUTORES.
 # ---------------------------------------------------------------------------
 VERSION_PROGRAMA: Final[str] = "1.0.0"
-AUTORES: Final[str] = "[usuario] · [usuario]"
+AUTORES: Final[str] = "Carlos · Jose Antonio · Luciano"
 PENDIENTE: Final[str] = "  (opción pendiente de implementar)"
 
 # ---------------------------------------------------------------------------
@@ -152,8 +152,37 @@ def opcion_2_resumen() -> None:
 
 
 def opcion_3_estabilidad() -> None:
-    """[Docstring: qué hace esta opción.]"""
-    print(PENDIENTE)
+    """Muestra el estado de cada semana y cuenta las de cada tipo."""
+
+    estables = 0
+    aceptables = 0
+    revisar = 0
+    criticas = 0
+    mantenimiento = 0
+
+
+    for semana, (descargas, caidas) in enumerate(
+        zip(DESCARGAS, CAIDAS), start=1
+    ):
+        estado_semana = estado(descargas, caidas)
+        print(f"Semana {semana}: {estado_semana}")
+
+        match estado_semana:
+            case "Estable":
+                estables += 1
+            case "Aceptable":
+                aceptables += 1
+            case "Revisar":
+                revisar += 1
+            case "Crítica":
+                criticas += 1
+            case "Mantenimiento":
+                mantenimiento += 1
+
+    
+    print("-" * ANCHO)
+    print(f"Estables: {estables} · Aceptables: {aceptables} · Revisar: {revisar}")
+    print(f"Criticas: {criticas} · Mantenimiento: {mantenimiento}")
 
 
 def opcion_4_umbral() -> None:

@@ -36,6 +36,9 @@ OPCION_SALIR: Final[int] = 9
 # Constantes de la pareja. Todo valor fijo del programa va aquí, con nombre.
 # ---------------------------------------------------------------------------
 
+UMBRAL_BUSQUEDA_MIN: Final[float] = 0.0
+
+UMBRAL_BUSQUEDA_MAX: Final[float] = 1_000.0
 
 # ---------------------------------------------------------------------------
 # Excepciones propias de la pareja. Aquí va SemanaNoValida (opción 7).
@@ -118,7 +121,17 @@ def pedir_real(mensaje: str, minimo: float, maximo: float) -> float:
     Si se escribe algo que no es un número o está fuera de rango, avisa y
     lo vuelve a pedir.
     """
-    return minimo                     # provisional
+    while True:
+        try:
+            numero = float(input(mensaje))
+        except ValueError:
+            print("Introduce un número válido.")
+            continue
+        
+        if minimo <= numero <= maximo:
+            return numero
+
+        print(f"Introduce un número entre {minimo} y {maximo}. ")
 
 
 def semana_valida(texto: str) -> int:
@@ -226,8 +239,27 @@ def opcion_3_estabilidad() -> None:
 
 
 def opcion_4_umbral() -> None:
-    """[Docstring: qué hace esta opción.]"""
-    print(PENDIENTE)
+    """Busca la primera semana activa que alcanza el umbral indicado. """
+    umbral = pedir_real(
+        "Umbral en caídas por mil: ",
+        UMBRAL_BUSQUEDA_MIN,
+        UMBRAL_BUSQUEDA_MAX,
+    )
+
+    for semana, (descargas, caidas) in enumerate(
+        zip(DESCARGAS, CAIDAS), start=1
+    ):
+        if descargas == 0:
+            continue
+
+        tasa = tasa_caidas(descargas, caidas)
+        if tasa >= umbral:
+            print(f"Primera semana: {semana} ({tasa} %)")
+            break
+
+    else:
+        print(f"Ninguna semana alcanza {umbral} $")
+    
 
 
 def opcion_5_racha() -> None:

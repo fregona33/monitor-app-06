@@ -2,6 +2,8 @@
 
 from typing import Final
 
+from pip._internal.utils import logging
+
 # Añadid aquí las importaciones que necesitéis.
 
 # ---------------------------------------------------------------------------
@@ -43,6 +45,11 @@ UMBRAL_BUSQUEDA_MAX: Final[float] = 1_000.0
 # ---------------------------------------------------------------------------
 # Excepciones propias de la pareja. Aquí va SemanaNoValida (opción 7).
 # ---------------------------------------------------------------------------
+
+class SemanaNoValida(Exception):
+    """Error cuando la semana no es válida."""
+    pass
+
 
 
 # ---------------------------------------------------------------------------
@@ -105,8 +112,10 @@ def pedir_entero(mensaje: str, minimo: int, maximo: int) -> int:
 
             if minimo <= numero <= maximo:
                 return numero
+            else:
+                print(f"introduce un numero entre {minimo} y {maximo}: ")
 
-            print(f"introduce un numero entre {minimo} y {maximo}: ")
+
 
         except ValueError:
             print("Tienes que introducir un numero entero.")
@@ -121,17 +130,20 @@ def pedir_real(mensaje: str, minimo: float, maximo: float) -> float:
     Si se escribe algo que no es un número o está fuera de rango, avisa y
     lo vuelve a pedir.
     """
+
+
+
     while True:
         try:
             numero = float(input(mensaje))
-        except ValueError:
-            print("Introduce un número válido.")
-            continue
-        
-        if minimo <= numero <= maximo:
-            return numero
+            if minimo <= numero <= maximo:
+                return numero
+            else:
+                print(f"introduce un numero entre {minimo} y {maximo}: ")
 
-        print(f"Introduce un número entre {minimo} y {maximo}. ")
+
+        except ValueError:
+            print("Tienes que introducir un numero entero")
 
 
 def semana_valida(texto: str) -> int:
@@ -139,7 +151,16 @@ def semana_valida(texto: str) -> int:
 
     Lanza SemanaNoValida si no es un entero o está fuera de rango.
     """
-    return 1                          # provisional
+
+    try:
+        semana = int(texto)
+    except ValueError:
+        raise SemanaNoValida(f"«{texto}» no es un número de semana")
+
+    if semana < 1 or semana > len(DESCARGAS):
+        raise SemanaNoValida(f"la semana {semana} no existe: "f"hay de 1 a {len(DESCARGAS)}")
+
+    return semana
 
 
 def comprobar_datos() -> int:
@@ -148,7 +169,33 @@ def comprobar_datos() -> int:
     Registra cada error con logging.error y cada semana de mantenimiento
     con logging.warning.
     """
-    return 0                          # provisional
+    errores = 0
+
+    if len(DESCARGAS) != len(CAIDAS):
+        logging.error("Listas diferentes")
+        errores += 1
+
+    semana = 1
+
+    for descargas, caidas in zip(DESCARGAS, CAIDAS):
+        if descargas < 0:
+            logging.error("descargas negativas")
+            errores += 1
+
+        if caidas < 0:
+            logging.error("Caidas negativas")
+            errores += 1
+
+        if caidas > descargas:
+            logging.error("Demasiadas caidas")
+            errores += 1
+
+        if descargas == 0:
+            logging.warning(f"semana {semana}: mantenimiento")
+
+        semana += 1
+
+    return errores
 
 
 # ---------------------------------------------------------------------------
@@ -232,7 +279,7 @@ def opcion_3_estabilidad() -> None:
             case "Mantenimiento":
                 mantenimiento += 1
 
-    
+
     print("-" * ANCHO)
     print(f"Estables: {estables} · Aceptables: {aceptables} · Revisar: {revisar}")
     print(f"Criticas: {criticas} · Mantenimiento: {mantenimiento}")
@@ -259,7 +306,7 @@ def opcion_4_umbral() -> None:
 
     else:
         print(f"Ninguna semana alcanza {umbral} $")
-    
+
 
 
 def opcion_5_racha() -> None:

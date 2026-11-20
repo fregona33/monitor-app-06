@@ -21,7 +21,7 @@ CAIDAS: Final = [14, 12, 15, 9, 0, 22,
 # Datos del programa. Solo hay que cambiar AUTORES.
 # ---------------------------------------------------------------------------
 VERSION_PROGRAMA: Final[str] = "1.0.0"
-AUTORES: Final[str] = "[usuario] · [usuario]"
+AUTORES: Final[str] = "Carlos · Jose Antonio · Luciano"
 PENDIENTE: Final[str] = "  (opción pendiente de implementar)"
 
 # ---------------------------------------------------------------------------
@@ -38,6 +38,9 @@ OPCION_SALIR: Final[int] = 9
 # Constantes de la pareja. Todo valor fijo del programa va aquí, con nombre.
 # ---------------------------------------------------------------------------
 
+UMBRAL_BUSQUEDA_MIN: Final[float] = 0.0
+
+UMBRAL_BUSQUEDA_MAX: Final[float] = 1_000.0
 
 # ---------------------------------------------------------------------------
 # Excepciones propias de la pareja. Aquí va SemanaNoValida (opción 7).
@@ -233,8 +236,8 @@ def opcion_2_resumen() -> None:
         total_caidas += caidas
         if descargas > mas:
             mas = descargas
-        semana_mas = semana
-        if descargas < menos:
+            semana_mas = semana ## Primer error corregido.
+        if semana_menos == 0 or descargas < menos: ## Segundo error corregido.
             menos = descargas
             semana_menos = semana
     media = total_descargas / activas
@@ -249,13 +252,61 @@ def opcion_2_resumen() -> None:
 
 
 def opcion_3_estabilidad() -> None:
-    """[Docstring: qué hace esta opción.]"""
-    print(PENDIENTE)
+    """Muestra el estado de cada semana y cuenta las de cada tipo."""
+
+    estables = 0
+    aceptables = 0
+    revisar = 0
+    criticas = 0
+    mantenimiento = 0
+
+
+    for semana, (descargas, caidas) in enumerate(
+        zip(DESCARGAS, CAIDAS), start=1
+    ):
+        estado_semana = estado(descargas, caidas)
+        print(f"Semana {semana}: {estado_semana}")
+
+        match estado_semana:
+            case "Estable":
+                estables += 1
+            case "Aceptable":
+                aceptables += 1
+            case "Revisar":
+                revisar += 1
+            case "Crítica":
+                criticas += 1
+            case "Mantenimiento":
+                mantenimiento += 1
+
+
+    print("-" * ANCHO)
+    print(f"Estables: {estables} · Aceptables: {aceptables} · Revisar: {revisar}")
+    print(f"Criticas: {criticas} · Mantenimiento: {mantenimiento}")
 
 
 def opcion_4_umbral() -> None:
-    """[Docstring: qué hace esta opción.]"""
-    print(PENDIENTE)
+    """Busca la primera semana activa que alcanza el umbral indicado. """
+    umbral = pedir_real(
+        "Umbral en caídas por mil: ",
+        UMBRAL_BUSQUEDA_MIN,
+        UMBRAL_BUSQUEDA_MAX,
+    )
+
+    for semana, (descargas, caidas) in enumerate(
+        zip(DESCARGAS, CAIDAS), start=1
+    ):
+        if descargas == 0:
+            continue
+
+        tasa = tasa_caidas(descargas, caidas)
+        if tasa >= umbral:
+            print(f"Primera semana: {semana} ({tasa} %)")
+            break
+
+    else:
+        print(f"Ninguna semana alcanza {umbral} $")
+
 
 
 def opcion_5_racha() -> None:

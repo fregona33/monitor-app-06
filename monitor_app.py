@@ -51,7 +51,19 @@ def tasa_caidas(descargas: int, caidas: int) -> float:
 
     Lanza ZeroDivisionError si la semana no tiene descargas.
     """
+
+
+    if descargas == 0:
+        raise ZeroDivisionError("Esta semana no tiene descargas")
+
     return caidas / descargas * POR_MIL
+
+
+
+
+
+
+
 
 
 def estado(descargas: int, caidas: int) -> str:
@@ -60,7 +72,21 @@ def estado(descargas: int, caidas: int) -> str:
     Es uno de estos textos: "Estable", "Aceptable", "Revisar", "Crítica" o
     "Mantenimiento", este último si la semana no tiene descargas.
     """
-    return PENDIENTE                  # provisional
+
+    if descargas == 0:
+        return "Mantenimiento"
+
+    tasa = tasa_caidas(descargas,caidas)
+
+    if tasa < UMBRAL_ESTABLE:
+        return "Estable"
+    elif tasa < UMBRAL_ACEPTABLE:
+        return "Aceptable"
+    elif tasa < UMBRAL_REVISAR:
+        return "Revisar"
+    else:
+        return "Critico"
+
 
 
 def pedir_entero(mensaje: str, minimo: int, maximo: int) -> int:
@@ -69,7 +95,21 @@ def pedir_entero(mensaje: str, minimo: int, maximo: int) -> int:
     Si se escribe algo que no es un entero o está fuera de rango, avisa y
     lo vuelve a pedir.
     """
-    return minimo                     # provisional
+
+    while True:
+        try:
+            numero = int(input(mensaje))
+
+            if minimo <= numero <= maximo:
+                return numero
+
+            print(f"introduce un numero entre {minimo} y {maximo}: ")
+
+        except ValueError:
+            print("Tienes que introducir un numero entero.")
+
+
+
 
 
 def pedir_real(mensaje: str, minimo: float, maximo: float) -> float:

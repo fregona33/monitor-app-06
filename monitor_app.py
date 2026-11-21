@@ -1,4 +1,4 @@
-"""[Docstring del módulo: una sola línea que diga qué hace el programa.]"""
+"""Aplicación de monitorización de una app de descargas y caídas."""
 
 from typing import Final
 
@@ -21,7 +21,7 @@ CAIDAS: Final = [14, 12, 15, 9, 0, 22,
 # Datos del programa. Solo hay que cambiar AUTORES.
 # ---------------------------------------------------------------------------
 VERSION_PROGRAMA: Final[str] = "1.0.0"
-AUTORES: Final[str] = "Carlos · Jose Antonio · Luciano"
+AUTORES: Final[str] = "Carlos Buitrago Alacaráz · Luciano Gómez Gálvez · José Antonio Collado López"
 PENDIENTE: Final[str] = "  (opción pendiente de implementar)"
 
 # ---------------------------------------------------------------------------
@@ -39,8 +39,12 @@ OPCION_SALIR: Final[int] = 9
 # ---------------------------------------------------------------------------
 
 UMBRAL_BUSQUEDA_MIN: Final[float] = 0.0
-
 UMBRAL_BUSQUEDA_MAX: Final[float] = 1_000.0
+OBJETIVO_DESCARGAS_MAX: Final[int] = 1_000_000
+CRECIMIENTO_MIN: Final[float] = 0.5
+CRECIMIENTO_MAX: Final[float] = 50.0
+MAX_SEMANAS_PREVISION: Final[int] = 104
+POR_CIENTO: Final[int] = 100
 
 # ---------------------------------------------------------------------------
 # Excepciones propias de la pareja. Aquí va SemanaNoValida (opción 7).
@@ -202,8 +206,12 @@ def comprobar_datos() -> int:
 # Menú y opciones. La opción 1 viene hecha y la 2 tiene dos errores.
 # ---------------------------------------------------------------------------
 def mostrar_menu() -> None:
-    """[Docstring: qué hace esta función.]"""
-    print(PENDIENTE)
+    """Se muestra el menú de opciones y se pide la opción elegida."""
+    print("Opciones:")
+    print("1. Listado de semanas")
+    print("2. Resumen")
+    print("3. Estabilidad")
+    print("4. Salir")
 
 
 def opcion_1_listado() -> None:
@@ -301,26 +309,97 @@ def opcion_4_umbral() -> None:
 
         tasa = tasa_caidas(descargas, caidas)
         if tasa >= umbral:
-            print(f"Primera semana: {semana} ({tasa} %)")
+            print(f"Primera semana: {semana} ({tasa} ‰)")
             break
 
     else:
-        print(f"Ninguna semana alcanza {umbral} $")
+        print(f"Ninguna semana alcanza {umbral} ‰")
 
 
 
 def opcion_5_racha() -> None:
-    """[Docstring: qué hace esta opción.]"""
-    print(PENDIENTE)
+    """Muestra la racha más larga de semanas en estado Estable o Aceptable."""
+    mejor_racha = 0
+    inicio_mejor = 0
+    racha_actual = 0
+    inicio_actual = 0
+
+    for semana, (descargas, caidas) in enumerate(
+        zip(DESCARGAS, CAIDAS), start=1
+    ):
+        estado_semana = estado(descargas, caidas)
+
+        if estado_semana == "Mantenimiento":
+            continue
+
+        if estado_semana in ("Estable", "Aceptable"):
+            if racha_actual == 0:
+                inicio_actual = semana
+            racha_actual += 1
+            if racha_actual > mejor_racha:
+                mejor_racha = racha_actual
+                inicio_mejor = inicio_actual
+        else:
+            racha_actual = 0
+
+    if mejor_racha == 0:
+        print("No hay ninguna semana en estado Estable o Aceptable.")
+    else:
+        etiqueta = "semana" if mejor_racha == 1 else "semanas"
+        print(
+            f"Mejor racha: {mejor_racha} {etiqueta}, "
+            f"desde la semana {inicio_mejor}."
+            )
 
 
 def opcion_6_prevision() -> None:
-    """[Docstring: qué hace esta opción.]"""
-    print(PENDIENTE)
+    """Calcula en cuántas semanas se alcanza un objetivo de descargas"""
+    ultima_activa = 0
+    for descargas in DESCARGAS:
+        if descargas > 0:
+            ultima_activa = descargas
+
+    if ultima_activa == 0:
+        print("No hay ninguna semana activa para calcular la previsión.")
+        return
+
+    print(f"Descargas de la última semana activa: {ultima_activa}")
+
+    objetivo = pedir_entero(
+        "Objetivo semanal de descargas: ",
+        ultima_activa + 1,
+        OBJETIVO_DESCARGAS_MAX,
+    )
+
+    crecimiento = pedir_real(
+        "Crecimiento semanal en %: ",
+        CRECIMIENTO_MIN,
+        CRECIMIENTO_MAX,
+    )
+
+    factor_crecimiento = 1 + crecimiento / POR_CIENTO
+    descargas_estimadas = float(ultima_activa)
+    semanas = 0
+
+    while descargas_estimadas < objetivo:
+        if semanas == MAX_SEMANAS_PREVISION:
+            print(
+                f"No se alcanza el objetivo en {MAX_SEMANAS_PREVISION} "
+                f"semanas ({descargas_estimadas:.0f} descargas)."
+            )
+            break
+        descargas_estimadas *= factor_crecimiento
+        semanas += 1
+    else:
+        etiqueta = "semana" if semanas == 1 else "semanas"
+        print(
+            f"Se alcanza el objetivo en {semanas} {etiqueta} "
+            f"({descargas_estimadas:.0f} descargas)."
+        )
 
 
 def opcion_7_consulta() -> None:
-    """[Docstring: qué hace esta opción.]"""
+    """Selecciona una semana y se muestra su estado y la acción recomendada."""
 
 
     texto = input("Semana (1-12): ")
@@ -357,7 +436,7 @@ def opcion_7_consulta() -> None:
 
 
 def opcion_8_comprobar() -> None:
-    """[Docstring: qué hace esta opción.]"""
+    """Avisa si los datos semanales tienen errores y cuántos."""
 
     errores = comprobar_datos()
 

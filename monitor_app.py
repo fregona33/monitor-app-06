@@ -1,10 +1,14 @@
 """Aplicación de monitorización de una app de descargas y caídas."""
 
+import sys
 from typing import Final
 
 from pip._internal.utils import logging
 
 # Añadid aquí las importaciones que necesitéis.
+
+import logging
+import sys
 
 # ---------------------------------------------------------------------------
 # Datos de la aplicación. Sustituid los del ejemplo APP-00 por los vuestros.
@@ -207,12 +211,18 @@ def comprobar_datos() -> int:
 # ---------------------------------------------------------------------------
 def mostrar_menu() -> None:
     """Se muestra el menú de opciones y se pide la opción elegida."""
-    print("Opciones:")
-    print("1. Listado de semanas")
+    linea = "=" * ANCHO
+    print(f"\n{linea}")
+    print(linea)
+    print("1. Listado semanal")
     print("2. Resumen")
-    print("3. Estabilidad")
-    print("4. Salir")
-
+    print("3. Estabilidad por semana")
+    print("4. Primera semana que alcanza un umbral")
+    print("5. Mejor racha sin problemas")
+    print("6. Previsión de crecimiento")
+    print("7. Consultar una semana")
+    print("8. Comprobar los datos")
+    print(f"{OPCION_SALIR}. Salir")
 
 def opcion_1_listado() -> None:
     """Muestra las descargas, las caídas y la tasa de cada semana."""
@@ -447,12 +457,58 @@ def opcion_8_comprobar() -> None:
 
 
 def main() -> None:
-    """[Docstring: qué hace la función principal.]"""
+    """Configura el registro, valida los datos y ejecuta el menú principal."""
     # Provisional: sustituidlo por el bucle del menú (tarea 2).
-    mostrar_menu()
-    opcion_1_listado()
-    opcion_2_resumen()
-    print(PENDIENTE)
+    logging.basicConfig(
+        level=logging.WARNING,
+        format="%(levelname)s: %(message)s"
+    )
+
+    if comprobar_datos() > 0:
+        sys.exit("Los datos semanales tienen errores: corrígelos antes de continuar.")
+
+    print(f"Monitor de estabilidad {VERSION_PROGRAMA})")
+
+    try:
+        while True:
+            mostrar_menu()
+            entrada = input("Opción: ").strip()
+
+            try:
+                opcion = int(entrada)
+            except ValueError:
+                print(f"«{entrada}» no es una de opción")
+                continue
+
+            match opcion:
+                case 1:
+                    opcion_1_listado()
+                case 2:
+                    opcion_2_resumen()
+                case 3:
+                    opcion_3_estabilidad()
+                case 4:
+                    opcion_4_umbral()
+                case 5:
+                    opcion_5_racha()
+                case 6:
+                    opcion_6_prevision()
+                case 7:
+                    opcion_7_consulta()
+                case 8:
+                    opcion_8_comprobar()
+                case 9:
+                    respuesta = input("¿Seguro que quieres salir? (s/n): ").strip().lower()
+                    if respuesta.lower() == "s":
+                        break
+                case _:
+                    print(
+                        f"Elige una opción entre {PRIMERA_OPCION} y {ULTIMA_OPCION}."
+                    )
+    except KeyboardInterrupt:
+        print("\nPrograma interrumpido.")
+
+    print(f"Fin del monitor de {CODIGO}")
 
 
 if __name__ == "__main__":

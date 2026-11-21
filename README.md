@@ -1,4 +1,4 @@
-# Monitor de estabilidad de la aplicación APP-XX
+# Monitor de estabilidad de la aplicación APP-06
 
 Programa de menú que analiza las descargas y las caídas semanales de una aplicación móvil
 publicada: listado, resumen, estabilidad de cada semana, búsqueda por umbral, mejor racha,

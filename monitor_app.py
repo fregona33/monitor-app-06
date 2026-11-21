@@ -321,12 +321,50 @@ def opcion_6_prevision() -> None:
 
 def opcion_7_consulta() -> None:
     """[Docstring: qué hace esta opción.]"""
-    print(PENDIENTE)
+
+
+    texto = input("Semana (1-12): ")
+
+    try:
+        semana = semana_valida(texto)
+    except SemanaNoValida as error:
+        print(f"No se puede consultar: {error}")
+        return
+
+    for numero, (descargas, caidas) in enumerate(
+            zip(DESCARGAS, CAIDAS), start=1):
+
+        if numero == semana:
+            estado_semana = estado(descargas, caidas)
+
+            match estado_semana:
+                case "Estable":
+                    accion = "Sin acciones"
+                case "Aceptable":
+                    accion = "Vigilar en la próxima versión"
+                case "Revisar":
+                    accion = "Revisar los informes de errores"
+                case "Crítica":
+                    accion = "Publicar una versión correctora urgente"
+                case "Mantenimiento":
+                    accion = "La app no estuvo publicada esa semana"
+
+            print(f"Descargas: {descargas}")
+            print(f"Caídas: {caidas}")
+            print(f"Estado: {estado_semana}")
+            print(f"Acción: {accion}")
+            break
 
 
 def opcion_8_comprobar() -> None:
     """[Docstring: qué hace esta opción.]"""
-    print(PENDIENTE)
+
+    errores = comprobar_datos()
+
+    if errores == 0:
+        print(f"Datos correctos: {len(DESCARGAS)} semanas")
+    else:
+        print(f"Los datos tienen {errores} errores.")
 
 
 def main() -> None:

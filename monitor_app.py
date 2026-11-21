@@ -2,18 +2,14 @@
 
 import sys
 from typing import Final
-
-from pip._internal.utils import logging
+import logging
 
 # Añadid aquí las importaciones que necesitéis.
-
-import logging
-import sys
 
 # ---------------------------------------------------------------------------
 # Datos de la aplicación. Sustituid los del ejemplo APP-00 por los vuestros.
 # ---------------------------------------------------------------------------
-CODIGO: Final[str] = "APP-00"
+CODIGO: Final[str] = "APP-06"
 NOMBRE: Final[str] = "Agenda Escolar"
 # Una posición por semana, de la 1 a la 12. 0 descargas: app retirada.
 DESCARGAS: Final = [1_200, 1_350, 1_280, 1_500, 0, 1_720,
@@ -25,7 +21,7 @@ CAIDAS: Final = [14, 12, 15, 9, 0, 22,
 # Datos del programa. Solo hay que cambiar AUTORES.
 # ---------------------------------------------------------------------------
 VERSION_PROGRAMA: Final[str] = "1.0.0"
-AUTORES: Final[str] = "Carlos Buitrago Alacaráz · Luciano Gómez Gálvez · José Antonio Collado López"
+AUTORES: Final[str] = "Carlos Buitrago Alcaraz · Luciano Gómez Gálvez · José Antonio Collado López"
 PENDIENTE: Final[str] = "  (opción pendiente de implementar)"
 
 # ---------------------------------------------------------------------------
@@ -458,7 +454,6 @@ def opcion_8_comprobar() -> None:
 
 def main() -> None:
     """Configura el registro, valida los datos y ejecuta el menú principal."""
-    # Provisional: sustituidlo por el bucle del menú (tarea 2).
     logging.basicConfig(
         level=logging.WARNING,
         format="%(levelname)s: %(message)s"
@@ -503,7 +498,7 @@ def main() -> None:
                         break
                 case _:
                     print(
-                        f"Elige una opción entre {PRIMERA_OPCION} y {ULTIMA_OPCION}."
+                        f"Elige una opción entre 1 y 9."
                     )
     except KeyboardInterrupt:
         print("\nPrograma interrumpido.")

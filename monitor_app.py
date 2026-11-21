@@ -99,7 +99,7 @@ def estado(descargas: int, caidas: int) -> str:
     elif tasa < UMBRAL_REVISAR:
         return "Revisar"
     else:
-        return "Critico"
+        return "Crítica"
 
 
 
